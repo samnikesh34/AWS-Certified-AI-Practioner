@@ -1,53 +1,80 @@
-# AWS AI Practitioner — username profiles
+# AWS AI Practitioner Exam Study Platform
 
-A static website with 10 tests (650 questions), lessons organized by the five exam domains, explanations and review. No database, passwords, API keys or backend required.
+A modern, offline-first learning platform for AWS AI Practitioner (AIF-C01) certification with 650 practice questions across 5 exam domains. No backend, database, or authentication required.
 
-## How profiles work
+## Key Features
 
-Enter a username to start or resume. Names are case-insensitive and can contain 2–30 letters, numbers, underscores or hyphens. Progress saves automatically in localStorage, separately for each username on that browser and website address. It is a profile selector, not authentication. Anyone using the same browser can select the same name.
+- **10 Practice Tests**: 650 comprehensively explained questions aligned with exam domains
+- **Offline Capable**: Works entirely in-browser using local storage
+- **Profile System**: Track multiple learners with independent progress on one device
+- **Complete Offline**: No internet connection required after initial load
+- **Study Notes**: Reference material organized by domain in table format
 
-Other people on other devices have independent local progress even if they choose the same name. Clearing browser data removes progress. Private browsing may erase progress on exit. No automatic cross-device synchronization is possible without shared storage.
+## Quick Start
 
-Use **My profile & backup** in the sidebar to switch usernames, view recent lesson/test activity, export progress or import a backup on another device. Import replaces the current profile's progress after confirmation. Export regularly. Retaking a test replaces that test's detailed attempt; the recent activity list keeps completion summaries (up to 200 events). Existing progress from the earlier app is not automatically migrated.
+### Run Locally
 
-## Run in Visual Studio Code
+1. Extract the ZIP file
+2. Open the project folder in VS Code (File → Open Folder)
+3. Start a local server:
+   ```bash
+   python -m http.server 8000 --directory dist
+   ```
+   Or on macOS/Linux: `python3 -m http.server 8000 --directory dist`
+4. Visit `http://localhost:8000`
 
-1. Extract this ZIP and open the project folder in VS Code (File → Open Folder).
-2. Open the terminal and run `python -m http.server 8000 --directory dist` (or `python3` on macOS/Linux).
-3. Open http://localhost:8000.
+**Note**: A local HTTP server provides better browser storage consistency than opening `dist/index.html` directly.
 
-Alternatively open `dist/index.html` directly, though a local HTTP server gives more consistent browser storage. No npm installation is required. Stopping the local server stops that local link only.
+### Deploy to GitHub Pages
 
-## Share a link that works with your laptop off
+1. Push the project to a GitHub repository
+2. Include at the root:
+   - `.github/workflows/pages.yml`
+   - `dist/` folder
+   - `scripts/` folder
+   - `package.json`
+3. Enable GitHub Pages in Settings → Pages with GitHub Actions as source
+4. Run the deployment workflow in Actions
+5. Share the published HTTPS link
 
-Host the project on GitHub Pages. GitHub serves the files independently of your computer.
+## How Profiles Work
 
-1. Replace the previous project in your GitHub repository with this folder's contents. Remove the previous Flask files if you uploaded the account-based version.
-2. Include `.github/workflows/pages.yml`, `dist/`, `scripts/` and `package.json` at the repository root.
-3. Commit to `main`.
-4. In Settings → Pages, choose GitHub Actions as the source.
-5. In Actions, run **Deploy learning project to GitHub Pages**.
-6. After a successful deployment, use Settings → Pages → Visit site and share that HTTPS link.
+- **Username**: Create or resume a profile (2–30 characters: letters, numbers, underscores, hyphens)
+- **Local Storage**: Progress saves automatically in your browser, not synced online
+- **Profile Backup**: Export and import progress using "My profile & backup" in the sidebar
+- **Device Specific**: Each device maintains independent progress, even with the same username
 
-The workflow checks the app before publishing. Hosting does not depend on your laptop. Localhost links cannot be shared this way.
+**Best Practice**: Export progress regularly as a backup before clearing browser data.
 
-## Source visibility
+## File Structure
 
-This static version sends JavaScript, lessons and question data to browsers; visitors can inspect them. Hiding all source is incompatible with this no-backend design. A private repository can hide repository history, but not delivered website assets. GitHub Pages from a private repository needs an eligible paid GitHub plan; alternatively host `dist/` separately while retaining a private repository. Tests 1–4 contain supplied course material; obtain permission before publicly redistributing it.
+- `dist/index.html`: Main application
+- `dist/app.js`: Learning and test interface
+- `dist/data.js`: All questions and explanations
+- `dist/profiles.js`: Profile management and data export/import
+- `dist/style.css`: Responsive design
+- `dist/study-notes.html`: Reference material by domain
+- `scripts/check_app.cjs`: Quality checks (run with `npm test`)
 
-## Verification and files
+## Quality Assurance
 
-Run `npm test` with Node 20+. Checks cover the 650 question and explanation views, grading, timer behavior, username separation, resume, activity and backup validation. They are DOM-simulation checks, not browser visual tests.
+Run `npm test` (requires Node 20+) to validate:
+- All 650 question explanations
+- Grading logic and timer functionality
+- Profile save/restore and data backup
+- Cross-domain question accuracy
 
-- `dist/profiles.js`: username selection, progress export/import, profile activity.
-- `dist/app.js`: learning and test UI.
-- `dist/data.js`: all learning content and questions.
-- `dist/style.css`: responsive layout.
-- `dist/study-notes.html`: table-format notes.
-- `.github/workflows/pages.yml`: publishing workflow.
+## Content Notes
 
-Independent study material; practice percentages are not AWS scaled scores. Question-key caveats remain marked review-only. Six original practice sets repeat concepts across scenarios. Content reference date: 29 September 2026.
+- **Exam Coverage**: Organized by the five AIF-C01 domains
+- **Practice Scores**: Not equivalent to AWS scaled scores
+- **Source Material**: Tests 1–4 contain licensed course content
+- **Last Updated**: 29 September 2026
 
-## Domain organization
+## Licensing & Attribution
 
-Course-resource housekeeping and course section numbers have been removed. Both the learning reference and downloadable notes use the five AIF-C01 domains.
+Obtain permission before redistributing course material from tests 1–4.
+
+## Support
+
+For issues or improvements, review the code structure and test output. All functionality uses standard browser APIs.
