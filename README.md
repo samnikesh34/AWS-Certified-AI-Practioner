@@ -1,80 +1,84 @@
-# AWS AI Practitioner Learning Project
+# AWS AI Practitioner — account-based learning app
 
-A standalone, responsive learning website for AWS Certified AI Practitioner (AIF-C01). Built with plain HTML, CSS and JavaScript. No AWS account, API key, backend, framework or package installation is required.
+A server-rendered Flask application with individual learner accounts, 65 topic deep dives, section references and 10 tests (650 questions). This **replaces** the previous static project. Keep this repository private.
 
-## Included
+## What changed
 
-- 65 detailed topic lessons with worked scenarios and service comparisons.
-- Searchable table-format study notes and official AWS references.
-- 10 tests with 65 questions each: four supplied practice tests and six new scenario tests.
-- Every-option explanations, review flags, missed-question review and domain scores.
-- Study mode and timed practice with 90/120-minute settings.
-- Browser-local progress; moving to a different domain or browser starts separate progress.
+- Username + password registration and login; names alone cannot protect accounts.
+- Scrypt password hashes, server-stored expiring sessions and logout revocation.
+- One-time recovery keys for password resets without an email provider. Resetting invalidates existing sessions and rotates the key.
+- SQLite stores each user's lessons, attempts, answers, flags, explanation views and activity.
+- Saved attempts resume across devices after login. Multiple completed attempts remain available for review.
+- Questions render individually on the server. There is no downloadable `data.js` question bank.
+- Grading runs on the server. Timed tests reveal explanations only after submission; study mode reveals on request.
+- All-or-nothing multi-select, matching and ordering grading. Source-key corrections and review-only exclusions are retained.
+- Per-domain results and every-option explanations.
+- No frontend JavaScript is required. Forms have CSRF protection; output is escaped; login/recovery are rate-limited.
+
+## Privacy boundaries
+
+The server Python code, database, password hashes and complete content JSON are never exposed by a public file route. The browser receives rendered HTML and CSS plus the question or lesson being viewed. **Every website's rendered browser content can be inspected or copied.** No website can make content invisible to a person while showing it to them. This design protects backend implementation and other users' records; it is not DRM. Users can review material they are allowed to access, including explanations after completing a test.
+
+The operator can access the database as the site administrator. The app has no public user directory and no cross-user progress endpoint. Activity timestamps are UTC. Concurrent editing of the same attempt in multiple tabs is not supported; use one active tab per attempt.
+
+## Replace the old repository contents
+
+1. Set the existing GitHub repository to **Private**.
+2. Remove the old `dist/`, `scripts/`, `package.json` and `.github/workflows/pages.yml` from that repository. Disable any old GitHub Pages deployment.
+3. Upload the contents of this folder to the repository root, including `.github`, `.gitignore` and `private/`.
+4. Commit with `Add user accounts, private server content and saved learning progress`.
+5. Deploy as a Python web service, following DEPLOYMENT.md. GitHub Pages cannot run this app.
+
+The `private/` name is descriptive, not an access control by itself. Flask serves only its `static/` directory and declared routes. Do not configure a web server to expose the entire project directory.
+
+Previously published source copies or downloads cannot be recalled by changing repository visibility. Tests 1–4 contain supplied course material; only publish/share that material with the required permission.
 
 ## Run locally
 
-From this project folder:
+Requires Python 3.12 (tested).
 
 ```sh
-python3 -m http.server 8000 --directory dist
+python -m venv .venv
 ```
 
-On Windows, use `py` instead of `python3` if needed. Open http://localhost:8000. You can also open `dist/index.html` directly, but a local server is recommended for consistent browser storage behavior.
-
-## Upload to GitHub
-
-1. Extract the ZIP.
-2. Create an empty GitHub repository. Use a private repository for your personal copy of the supplied tests.
-3. Upload the **contents** of this folder, including `.github/workflows/pages.yml`, to the repository root. Do not upload the ZIP itself as the project.
-4. Commit to `main`. The root should contain `README.md`, `package.json`, `dist/`, `scripts/` and `.github/`.
-
-Alternatively, from this folder, replacing YOUR-USER and YOUR-REPO:
+Activate the environment:
+- macOS/Linux: `source .venv/bin/activate`
+- Windows PowerShell: `.venv\Scripts\Activate.ps1`
 
 ```sh
-git init
-git add .
-git commit -m "Add AI Practitioner learning project"
-git branch -M main
-git remote add origin https://github.com/YOUR-USER/YOUR-REPO.git
-git push -u origin main
+pip install -r requirements.txt
+python app.py
 ```
 
-## Optional GitHub Pages hosting
+Open http://127.0.0.1:8000 and create an account. Local data persists in `instance/progress.sqlite3`. Local mode chooses an ephemeral signing secret if none is configured, so a restart may require signing in again; saved progress remains. Production requires a stable secret and HTTPS. `.env.example` is a configuration reference; Flask does not automatically load it in this project.
 
-In repository **Settings → Pages → Build and deployment**, select **GitHub Actions** as the source. Then open **Actions → Deploy learning project to GitHub Pages → Run workflow**. Subsequent pushes to `main` trigger deployment automatically. The workflow publishes only `dist/` and displays the site URL on completion.
+Answers save when pressing Save, Next, Previous, Flag or Finish. Use these before leaving a page. Timed deadlines continue while away and are enforced by the server; the displayed remaining minutes update on page navigation. Study mode has no deadline.
 
-GitHub Pages availability for private repositories depends on your GitHub plan. A private repository does not necessarily make its Pages website private. The four supplied tests may contain third-party course material: keep the project for personal use unless you have permission to distribute that content publicly.
-
-Workflow reference: https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages
-
-## Edit the project
-
-| File | Purpose |
-| --- | --- |
-| `dist/index.html` | Page entry point, title, stylesheet and script loading |
-| `dist/style.css` | Layout, colors, typography and responsive styles |
-| `dist/app.js` | Navigation, quizzes, scoring, timers and local progress |
-| `dist/data.js` | Lessons, questions, per-option explanations and AWS source links |
-| `dist/study-notes.html` | Downloadable table-format study notes |
-| `scripts/check_app.cjs` | Dependency-free Node functional checks |
-| `.github/workflows/pages.yml` | Automated checks and optional Pages deployment |
-
-All links to local assets are relative, supporting GitHub repository subpaths. The interface uses Google Fonts with system-font fallbacks. No analytics or server-side tracking is included.
-
-## Verify changes
-
-With Node.js 20 or newer:
+## Test
 
 ```sh
-npm test
+python -m unittest discover -s tests -v
 ```
 
-These checks exercise all 650 question and explanation views, answer persistence, exact grading, flags, navigation and timers in a lightweight DOM simulation. They do not replace visual browser testing.
+Tests cover 650 question/explanation pages, all lesson pages, scoring, account isolation, persistence across login, session revocation, CSRF checks, private-file denial, rate limits and expired attempts. These are server integration tests, not visual browser tests.
 
-## Study and scoring notes
+## Layout
 
-Official sources were checked on 29 September 2026. This is independent learning material, not an official AWS question bank. No passing outcome is guaranteed. Practice percentages are not AWS scaled scores.
+| Path | Purpose |
+|---|---|
+| `app.py` | Authentication, authorization, database, server grading and routes |
+| `templates/` | Server-rendered screens |
+| `static/` | Public CSS only |
+| `private/content.json` | Server-only course and question data |
+| `instance/` | Local database; excluded from Git |
+| `tests/` | Server integration checks |
+| `Dockerfile` | Optional container deployment |
+| `DEPLOYMENT.md` | Private-repository/public-website hosting instructions |
 
-Tests 1–4 preserve supplied questions and keys, with correction notes. Ambiguous or outdated items are marked review-only and excluded from adjusted scores. Tests 5–10 reuse concepts across distinct scenarios for learning; they are not independent readiness measurements. The 120-minute setting is intended for an approved exam accommodation.
+## Operational limits
 
-Content is maintained directly in `dist/data.js`; there is no build step. No ChatGPT hosting configuration, credentials or source-repository history is included in this export. No blanket redistribution license is granted for the supplied third-party test material.
+Designed for a small shared learning app using one server instance and a persistent SQLite disk. Do not use an ephemeral filesystem or multiple replicas with separate databases. For a larger audience, migrate to managed PostgreSQL, add robust edge abuse controls and operational monitoring. Behind a proxy, authentication rate limits use the direct peer IP by default; add provider-level rate limiting and configure trusted proxy handling for the exact deployment if needed. Do not blindly trust forwarded IP headers.
+
+No email verification or email reset service is configured. Recovery is via the saved recovery key. Keep regular database backups. There is no self-service account deletion screen; the operator manages account-data requests. No blanket license grants redistribution of the supplied third-party tests.
+
+Official learning sources remain in the authenticated Sources page. Content review date: 29 September 2026. Independent practice material; no certification guarantee.
