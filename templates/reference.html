@@ -1,1 +1,0 @@
-{% extends 'base.html' %}{% block body %}<a href="/learn">← All sections</a><h1>{{ lesson.title }}</h1><div class="tablewrap"><table><thead><tr><th>Topic</th><th>Explanation</th><th>Example</th></tr></thead><tbody>{% for r in lesson.rows %}<tr><th>{{ r.topic }}</th><td>{{ r.explanation }}</td><td>{{ r.example }}</td></tr>{% endfor %}</tbody></table></div>{% endblock %}
