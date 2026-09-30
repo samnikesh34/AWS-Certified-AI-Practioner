@@ -1,0 +1,12 @@
+{
+  "name": "aws-ai-practitioner-learning",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Example-based AWS AI Practitioner learning and 650-question practice project",
+  "scripts": {
+    "test": "node scripts/check_app.cjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
