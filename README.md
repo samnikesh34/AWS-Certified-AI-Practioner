@@ -1,6 +1,6 @@
 # AWS AI Practitioner — username profiles
 
-A static website with 10 tests (650 questions), lessons, explanations and review. No database, passwords, API keys or backend required.
+A static website with 10 tests (650 questions), lessons organized by the five exam domains, explanations and review. No database, passwords, API keys or backend required.
 
 ## How profiles work
 
@@ -47,3 +47,7 @@ Run `npm test` with Node 20+. Checks cover the 650 question and explanation view
 - `.github/workflows/pages.yml`: publishing workflow.
 
 Independent study material; practice percentages are not AWS scaled scores. Question-key caveats remain marked review-only. Six original practice sets repeat concepts across scenarios. Content reference date: 29 September 2026.
+
+## Domain organization
+
+Course-resource housekeeping and course section numbers have been removed. Both the learning reference and downloadable notes use the five AIF-C01 domains.
