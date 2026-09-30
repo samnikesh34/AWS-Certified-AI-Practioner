@@ -1,84 +1,49 @@
-# AWS AI Practitioner — account-based learning app
+# AWS AI Practitioner — username profiles
 
-A server-rendered Flask application with individual learner accounts, 65 topic deep dives, section references and 10 tests (650 questions). This **replaces** the previous static project. Keep this repository private.
+A static website with 10 tests (650 questions), lessons, explanations and review. No database, passwords, API keys or backend required.
 
-## What changed
+## How profiles work
 
-- Username + password registration and login; names alone cannot protect accounts.
-- Scrypt password hashes, server-stored expiring sessions and logout revocation.
-- One-time recovery keys for password resets without an email provider. Resetting invalidates existing sessions and rotates the key.
-- SQLite stores each user's lessons, attempts, answers, flags, explanation views and activity.
-- Saved attempts resume across devices after login. Multiple completed attempts remain available for review.
-- Questions render individually on the server. There is no downloadable `data.js` question bank.
-- Grading runs on the server. Timed tests reveal explanations only after submission; study mode reveals on request.
-- All-or-nothing multi-select, matching and ordering grading. Source-key corrections and review-only exclusions are retained.
-- Per-domain results and every-option explanations.
-- No frontend JavaScript is required. Forms have CSRF protection; output is escaped; login/recovery are rate-limited.
+Enter a username to start or resume. Names are case-insensitive and can contain 2–30 letters, numbers, underscores or hyphens. Progress saves automatically in localStorage, separately for each username on that browser and website address. It is a profile selector, not authentication. Anyone using the same browser can select the same name.
 
-## Privacy boundaries
+Other people on other devices have independent local progress even if they choose the same name. Clearing browser data removes progress. Private browsing may erase progress on exit. No automatic cross-device synchronization is possible without shared storage.
 
-The server Python code, database, password hashes and complete content JSON are never exposed by a public file route. The browser receives rendered HTML and CSS plus the question or lesson being viewed. **Every website's rendered browser content can be inspected or copied.** No website can make content invisible to a person while showing it to them. This design protects backend implementation and other users' records; it is not DRM. Users can review material they are allowed to access, including explanations after completing a test.
+Use **My profile & backup** in the sidebar to switch usernames, view recent lesson/test activity, export progress or import a backup on another device. Import replaces the current profile's progress after confirmation. Export regularly. Retaking a test replaces that test's detailed attempt; the recent activity list keeps completion summaries (up to 200 events). Existing progress from the earlier app is not automatically migrated.
 
-The operator can access the database as the site administrator. The app has no public user directory and no cross-user progress endpoint. Activity timestamps are UTC. Concurrent editing of the same attempt in multiple tabs is not supported; use one active tab per attempt.
+## Run in Visual Studio Code
 
-## Replace the old repository contents
+1. Extract this ZIP and open the project folder in VS Code (File → Open Folder).
+2. Open the terminal and run `python -m http.server 8000 --directory dist` (or `python3` on macOS/Linux).
+3. Open http://localhost:8000.
 
-1. Set the existing GitHub repository to **Private**.
-2. Remove the old `dist/`, `scripts/`, `package.json` and `.github/workflows/pages.yml` from that repository. Disable any old GitHub Pages deployment.
-3. Upload the contents of this folder to the repository root, including `.github`, `.gitignore` and `private/`.
-4. Commit with `Add user accounts, private server content and saved learning progress`.
-5. Deploy as a Python web service, following DEPLOYMENT.md. GitHub Pages cannot run this app.
+Alternatively open `dist/index.html` directly, though a local HTTP server gives more consistent browser storage. No npm installation is required. Stopping the local server stops that local link only.
 
-The `private/` name is descriptive, not an access control by itself. Flask serves only its `static/` directory and declared routes. Do not configure a web server to expose the entire project directory.
+## Share a link that works with your laptop off
 
-Previously published source copies or downloads cannot be recalled by changing repository visibility. Tests 1–4 contain supplied course material; only publish/share that material with the required permission.
+Host the project on GitHub Pages. GitHub serves the files independently of your computer.
 
-## Run locally
+1. Replace the previous project in your GitHub repository with this folder's contents. Remove the previous Flask files if you uploaded the account-based version.
+2. Include `.github/workflows/pages.yml`, `dist/`, `scripts/` and `package.json` at the repository root.
+3. Commit to `main`.
+4. In Settings → Pages, choose GitHub Actions as the source.
+5. In Actions, run **Deploy learning project to GitHub Pages**.
+6. After a successful deployment, use Settings → Pages → Visit site and share that HTTPS link.
 
-Requires Python 3.12 (tested).
+The workflow checks the app before publishing. Hosting does not depend on your laptop. Localhost links cannot be shared this way.
 
-```sh
-python -m venv .venv
-```
+## Source visibility
 
-Activate the environment:
-- macOS/Linux: `source .venv/bin/activate`
-- Windows PowerShell: `.venv\Scripts\Activate.ps1`
+This static version sends JavaScript, lessons and question data to browsers; visitors can inspect them. Hiding all source is incompatible with this no-backend design. A private repository can hide repository history, but not delivered website assets. GitHub Pages from a private repository needs an eligible paid GitHub plan; alternatively host `dist/` separately while retaining a private repository. Tests 1–4 contain supplied course material; obtain permission before publicly redistributing it.
 
-```sh
-pip install -r requirements.txt
-python app.py
-```
+## Verification and files
 
-Open http://127.0.0.1:8000 and create an account. Local data persists in `instance/progress.sqlite3`. Local mode chooses an ephemeral signing secret if none is configured, so a restart may require signing in again; saved progress remains. Production requires a stable secret and HTTPS. `.env.example` is a configuration reference; Flask does not automatically load it in this project.
+Run `npm test` with Node 20+. Checks cover the 650 question and explanation views, grading, timer behavior, username separation, resume, activity and backup validation. They are DOM-simulation checks, not browser visual tests.
 
-Answers save when pressing Save, Next, Previous, Flag or Finish. Use these before leaving a page. Timed deadlines continue while away and are enforced by the server; the displayed remaining minutes update on page navigation. Study mode has no deadline.
+- `dist/profiles.js`: username selection, progress export/import, profile activity.
+- `dist/app.js`: learning and test UI.
+- `dist/data.js`: all learning content and questions.
+- `dist/style.css`: responsive layout.
+- `dist/study-notes.html`: table-format notes.
+- `.github/workflows/pages.yml`: publishing workflow.
 
-## Test
-
-```sh
-python -m unittest discover -s tests -v
-```
-
-Tests cover 650 question/explanation pages, all lesson pages, scoring, account isolation, persistence across login, session revocation, CSRF checks, private-file denial, rate limits and expired attempts. These are server integration tests, not visual browser tests.
-
-## Layout
-
-| Path | Purpose |
-|---|---|
-| `app.py` | Authentication, authorization, database, server grading and routes |
-| `templates/` | Server-rendered screens |
-| `static/` | Public CSS only |
-| `private/content.json` | Server-only course and question data |
-| `instance/` | Local database; excluded from Git |
-| `tests/` | Server integration checks |
-| `Dockerfile` | Optional container deployment |
-| `DEPLOYMENT.md` | Private-repository/public-website hosting instructions |
-
-## Operational limits
-
-Designed for a small shared learning app using one server instance and a persistent SQLite disk. Do not use an ephemeral filesystem or multiple replicas with separate databases. For a larger audience, migrate to managed PostgreSQL, add robust edge abuse controls and operational monitoring. Behind a proxy, authentication rate limits use the direct peer IP by default; add provider-level rate limiting and configure trusted proxy handling for the exact deployment if needed. Do not blindly trust forwarded IP headers.
-
-No email verification or email reset service is configured. Recovery is via the saved recovery key. Keep regular database backups. There is no self-service account deletion screen; the operator manages account-data requests. No blanket license grants redistribution of the supplied third-party tests.
-
-Official learning sources remain in the authenticated Sources page. Content review date: 29 September 2026. Independent practice material; no certification guarantee.
+Independent study material; practice percentages are not AWS scaled scores. Question-key caveats remain marked review-only. Six original practice sets repeat concepts across scenarios. Content reference date: 29 September 2026.
